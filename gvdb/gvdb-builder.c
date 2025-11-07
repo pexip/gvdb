@@ -64,7 +64,7 @@ gvdb_item_free (gpointer data)
   if (item->table)
     g_hash_table_unref (item->table);
 
-  g_slice_free (GvdbItem, item);
+  g_free (item);
 }
 
 GHashTable *
@@ -104,7 +104,7 @@ gvdb_hash_table_insert (GHashTable  *table,
 {
   GvdbItem *item;
 
-  item = g_slice_new0 (GvdbItem);
+  item = g_new0 (GvdbItem, 1);
   item->key = g_strdup (key);
   item->hash_value = djb_hash (key);
 
@@ -172,7 +172,7 @@ hash_table_new (gsize n_buckets)
 {
   HashTable *table;
 
-  table = g_slice_new (HashTable);
+  table = g_new (HashTable, 1);
   table->buckets = g_new0 (GvdbItem *, n_buckets);
   table->n_buckets = n_buckets;
 
@@ -184,7 +184,7 @@ hash_table_free (HashTable *table)
 {
   g_free (table->buckets);
 
-  g_slice_free (HashTable, table);
+  g_free (table);
 }
 
 static void
@@ -237,7 +237,7 @@ file_builder_allocate (FileBuilder         *fb,
     return NULL;
 
   fb->offset += (guint64) (-fb->offset) & (alignment - 1);
-  chunk = g_slice_new (FileChunk);
+  chunk = g_new (FileChunk, 1);
   chunk->offset = fb->offset;
   chunk->size = size;
   chunk->data = g_malloc (size);
@@ -289,7 +289,7 @@ file_builder_add_string (FileBuilder *fb,
 
   length = strlen (string);
 
-  chunk = g_slice_new (FileChunk);
+  chunk = g_new (FileChunk, 1);
   chunk->offset = fb->offset;
   chunk->size = length;
   chunk->data = g_malloc (length);
@@ -447,7 +447,7 @@ file_builder_new (gboolean byteswap)
 {
   FileBuilder *builder;
 
-  builder = g_slice_new (FileBuilder);
+  builder = g_new (FileBuilder, 1);
   builder->chunks = g_queue_new ();
   builder->offset = sizeof (struct gvdb_header);
   builder->byteswap = byteswap;
@@ -459,7 +459,7 @@ static void
 file_builder_free (FileBuilder *fb)
 {
   g_queue_free (fb->chunks);
-  g_slice_free (FileBuilder, fb);
+  g_free (fb);
 }
 
 static GString *
@@ -505,7 +505,7 @@ file_builder_serialise (FileBuilder          *fb,
       g_string_append_len (result, chunk->data, chunk->size);
       g_free (chunk->data);
 
-      g_slice_free (FileChunk, chunk);
+      g_free (chunk);
     }
 
   return result;
@@ -566,7 +566,7 @@ write_contents_data_new (GBytes *contents,
 {
   WriteContentsData *data;
 
-  data = g_slice_new (WriteContentsData);
+  data = g_new (WriteContentsData, 1);
   data->contents = g_bytes_ref (contents);
   data->file = g_object_ref (file);
 
@@ -578,7 +578,7 @@ write_contents_data_free (WriteContentsData *data)
 {
   g_bytes_unref (data->contents);
   g_object_unref (data->file);
-  g_slice_free (WriteContentsData, data);
+  g_free (data);
 }
 
 static void
